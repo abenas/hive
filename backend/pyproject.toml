@@ -1,0 +1,31 @@
+[project]
+name = "hive"
+version = "0.1.0"
+description = "Hive — plataforma multi-agente: orquestrador + especialistas com trilha de auditoria e FinOps"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "anthropic>=2.3.0",
+    "fastapi>=0.162.0",
+    "httpx>=0.28.1",
+    "pillow>=11",
+    "pydantic-settings>=2.16.2",
+    "sqlalchemy[asyncio]>=2.1.6",
+    "sse-starlette>=3.6.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

@@ -1,0 +1,11 @@
+services:
+  hive:
+    build: .
+    ports: ["8001:8000"]
+    env_file: [backend/.env]
+    environment:
+      HIVE_DATA_DIR: /data
+      HIVE_PUBLIC_BASE_URL: http://localhost:8001
+    volumes: [hive-data:/data]
+volumes:
+  hive-data:
