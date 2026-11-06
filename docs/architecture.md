@@ -2,28 +2,85 @@
 
 ## Visão geral
 
-```
- Canais                 Núcleo (domínio-agnóstico)                         Pacote de domínio
-┌──────────┐   ┌───────────────────────────────────────────────┐   ┌──────────────────────────┐
-│ Web      │──▶│ API (FastAPI) ──▶ Engine (máquina de estados) │──▶│ Atlas  · Orquestrador    │
-│ Telegram │──▶│        │              │  DoR · gates · rework │   │ Paula  · Product Owner   │
-│ WhatsApp*│   │        │              │  orçamento            │   │ Arthur · Arquiteto       │
-│ Slack*   │   │        ▼              ▼                       │   │ Diana  · Designer        │
-│ Teams*   │◀──│  EventBus ──▶ Trilha de auditoria (hash chain)│   │ Caio   · Redator/SEO     │
-└──────────┘   │        │      LLM Router ──▶ mock│Claude│Bedrock│Ollama │ Diego · Desenvolvedor │
-     ▲         │        │      Artifact Store (FS │ S3)         │   │ Quésia · QA              │
-     └─────────│── SSE ─┘      FinOps (llm_calls)               │   │ Nuvem  · Cloud/DevOps    │
-               └───────────────────────────────────────────────┘   │ Fábio  · FinOps          │
-                                                     * adaptadores │                          │
-                                                       a construir └──────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph canais["Canais"]
+        web["Web (console)"]
+        tg["Telegram"]
+        futuros["WhatsApp · Slack · Teams<br/><i>adaptadores a construir</i>"]
+    end
+
+    subgraph nucleo["Núcleo (domínio-agnóstico)"]
+        api["API (FastAPI)"]
+        engine["Engine<br/>máquina de estados<br/>DoR · gates · retrabalho · orçamento"]
+        bus["EventBus"]
+        audit[("Trilha de auditoria<br/>hash chain SHA-256")]
+        router["LLM Router"]
+        store[("Artifact Store<br/>FS · S3")]
+        finops[("FinOps<br/>llm_calls")]
+    end
+
+    subgraph provedores["Provedores de LLM"]
+        mock["mock"]
+        claude["Claude (Anthropic)"]
+        bedrock["Bedrock"]
+        ollama["Ollama (GPU local)"]
+    end
+
+    subgraph dominio["Pacote de domínio: sites"]
+        atlas["Atlas · Orquestrador"]
+        especialistas["Paula · Product Owner<br/>Arthur · Arquiteto<br/>Diana · Designer<br/>Caio · Redator/SEO<br/>Vera · Verificação de fatos<br/>Íris · Ilustradora<br/>Diego · Desenvolvedor<br/>Quésia · QA<br/>Nuvem · Cloud/DevOps<br/>Fábio · FinOps"]
+    end
+
+    web --> api
+    tg --> api
+    futuros -.-> api
+    api --> engine
+    engine --> atlas
+    atlas --> especialistas
+    engine --> bus
+    bus --> audit
+    bus -- SSE --> web
+    bus -- notificações --> tg
+    atlas --> router
+    especialistas --> router
+    router --> mock & claude & bedrock & ollama
+    router --> finops
+    especialistas --> store
 ```
 
 ## Ciclo de vida de uma missão
 
-```
-received → interpreting → planning → awaiting_plan_approval ─(humano)→ executing
-   → [tarefas em DAG, paralelas quando possível; QA reprova → retrabalho]
-   → awaiting_deploy_approval ─(humano)→ executing (deploy, FinOps) → completed
+```mermaid
+stateDiagram-v2
+    [*] --> received
+    received --> interpreting
+    interpreting --> planning: Brief
+    planning --> awaiting_plan_approval: Plan (DAG) validado
+    awaiting_plan_approval --> executing: humano aprova
+    awaiting_plan_approval --> rejected: humano rejeita
+
+    state executing {
+        [*] --> tarefas
+        tarefas: Tarefas em DAG (paralelas quando possível)
+        tarefas --> verificacao
+        verificacao: Verificadores (Vera, QA)
+        verificacao --> tarefas: reprova → retrabalho
+        verificacao --> [*]: aprova
+    }
+
+    executing --> awaiting_deploy_approval
+    awaiting_deploy_approval --> deploy: humano aprova
+    awaiting_deploy_approval --> rejected: humano rejeita
+    deploy: executing (deploy, FinOps)
+    deploy --> completed
+
+    executing --> failed: erro · orçamento · tentativas esgotadas
+    deploy --> failed
+    failed --> executing: retry
+
+    completed --> [*]
+    rejected --> [*]
 ```
 
 - **Interpretação**: o orquestrador gera um `Brief` estruturado e registra as premissas que assumiu.
