@@ -2,52 +2,7 @@
 
 ## Visão geral
 
-```mermaid
-flowchart LR
-    subgraph canais["Canais"]
-        web["Web (console)"]
-        tg["Telegram"]
-        futuros["WhatsApp · Slack · Teams<br/><i>adaptadores a construir</i>"]
-    end
-
-    subgraph nucleo["Núcleo (domínio-agnóstico)"]
-        api["API (FastAPI)"]
-        engine["Engine<br/>máquina de estados<br/>DoR · gates · retrabalho · orçamento"]
-        bus["EventBus"]
-        audit[("Trilha de auditoria<br/>hash chain SHA-256")]
-        router["LLM Router"]
-        store[("Artifact Store<br/>FS · S3")]
-        finops[("FinOps<br/>llm_calls")]
-    end
-
-    subgraph provedores["Provedores de LLM"]
-        mock["mock"]
-        claude["Claude (Anthropic)"]
-        bedrock["Bedrock"]
-        ollama["Ollama (GPU local)"]
-    end
-
-    subgraph dominio["Pacote de domínio: sites"]
-        atlas["Atlas · Orquestrador"]
-        especialistas["Paula · Product Owner<br/>Arthur · Arquiteto<br/>Diana · Designer<br/>Caio · Redator/SEO<br/>Vera · Verificação de fatos<br/>Íris · Ilustradora<br/>Diego · Desenvolvedor<br/>Quésia · QA<br/>Nuvem · Cloud/DevOps<br/>Fábio · FinOps"]
-    end
-
-    web --> api
-    tg --> api
-    futuros -.-> api
-    api --> engine
-    engine --> atlas
-    atlas --> especialistas
-    engine --> bus
-    bus --> audit
-    bus -- SSE --> web
-    bus -- notificações --> tg
-    atlas --> router
-    especialistas --> router
-    router --> mock & claude & bedrock & ollama
-    router --> finops
-    especialistas --> store
-```
+![Arquitetura da Hive: canais, núcleo, provedores de LLM e agentes](img/architecture.svg)
 
 ## Ciclo de vida de uma missão
 

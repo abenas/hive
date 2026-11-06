@@ -8,6 +8,10 @@ Você envia uma **missão** pela web ou pelo Telegram, por exemplo: *"Crie um si
 
 Tudo fica numa **trilha de auditoria encadeada por hash**. Ela registra quem fez o quê, com quais insumos, quais evidências, qual modelo de IA e quanto custou, do pedido até o site publicado.
 
+![Arquitetura da Hive](docs/img/architecture.svg)
+
+Detalhes em [docs/architecture.md](docs/architecture.md).
+
 Primeiro pacote de domínio: **Agência Digital para PMEs** (sites institucionais).
 
 ## Rodando localmente
